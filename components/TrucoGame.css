@@ -1,0 +1,57 @@
+.game{
+  display: flex;
+}
+.aside{
+  width: 100%;
+  
+  display: flex;
+}
+.cartas-jugadas{
+  
+  width: 100%;
+  display: flex;
+  justify-content: space-evenly;
+}
+.cartas-col{
+text-align: center;
+}
+
+.tablero {
+    text-align: center;
+    padding: 20px;
+    background-color: #2e8b57;
+    color: white;
+    min-height: 100vh;
+    min-width: 50vw;
+  }
+  
+  .jugador {
+    margin: 20px;
+  }
+  
+  .cartas {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+  }
+  
+  .carta {
+    background-color: white;
+    color: black;
+    border: 2px solid #000;
+    border-radius: 8px;
+    padding: 10px;
+    min-width: 60px;
+    text-align: center;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  
+  .carta.seleccionada {
+    border: 3px solid red;
+  }
+
+  .slot[data-swapy-highlighted] {
+    background: rgba(255, 255, 255, 0.2);
+  }
+ 

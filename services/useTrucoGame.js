@@ -1,0 +1,571 @@
+import { useEffect, useState } from "react";
+import { Carts } from "./Carts";
+
+export function useTrucoGame(){
+
+    /*const mazoPruebaJ1 = [ { valor: 1, palo: 'copa', jerarquia: 1 },
+    { valor: 12, palo: 'copa', jerarquia: 8 },
+    { valor: 12, palo: 'copa', jerarquia: 8 },
+ 
+  ]
+  const mazoPruebaJ2 = [ { valor: 1, palo: 'copa', jerarquia: 1 },
+    { valor: 12, palo: 'copa', jerarquia: 8 },
+    { valor: 12, palo: 'copa', jerarquia: 8 },
+  
+  ]*/
+
+
+      const {MAZO} = Carts()
+      
+      const [jugador1, setJugador1] = useState([]);
+      const [jugador2, setJugador2] = useState([]);
+      const [cartaSeleccionadaJ1, setCartaSeleccionadaJ1] = useState(null);
+      const [cartaSeleccionadaJ2, setCartaSeleccionadaJ2] = useState(null);
+      const [rondasGanadasJ1, setRondasGanadasJ1] = useState(0);
+      const [rondasGanadasJ2, setRondasGanadasJ2] = useState(0);
+      const [rondaActual, setRondaActual] = useState(1);
+      const [cartasJugadas, setCartasJugadas] = useState([]);
+      const [ganadorPartida, setGanadorPartida] = useState(null);
+      const [msg, setMsg] = useState('')
+      const [puntosj1, setPuntosJ1] = useState(0)
+      const [puntosj2, setPuntosJ2] = useState(0)
+      const [turno, setTurno] = useState(1);
+      const [envidoCantado, setEnvidoCantado] = useState(false);
+      const [envidoGanador, setEnvidoGanador] = useState(null);
+      const [jugada, setJugada] = useState(false)
+      const [jugadaIA, setJugadaIA] = useState(false)
+      const [jugadorInicial, setJugadorInicial] = useState(1);
+      const [cartaJ1EnMesa, setCartaJ1Mesa] = useState([])
+      const [cartaJ2EnMesa, setCartaJ2Mesa] = useState([])
+      const [partidaTerminada, setPartidaTerminada] = useState(false)
+      
+
+    
+    
+    
+  ////truco
+
+  const [trucoCantado, setTrucoCantado] = useState(false);
+  const [reTrucoCantado, setReTrucoCantado] = useState(false);
+  const [valeCuatroCantado, setValeCuatroCantado] = useState(false);
+  const [aceptarTruco, setAceptarTruco] = useState(null); // null: no decidido, true: aceptado, false: rechazado
+  const [aceptarReTruco, setAceptarReTruco] = useState(null);
+  const [aceptarValeCuatro, setAceptarValeCuatro] = useState(null);
+  const [preguntaVisible, setPreguntaVisible] = useState(false);
+  const [preguntaReTrucoVisible, setPreguntaReTrucoVisible] = useState(false);
+  const [preguntaValeCuatroVisible, setPreguntaValeCuatroVisible] = useState(false);
+
+    
+// Función para manejar el canto de truco por parte del jugador 1
+const manejarCantoTrucoJ1 = () => {
+  setTrucoCantado(true);
+  const decisionIA = Math.random(); // Probabilidad para IA
+  if (decisionIA < 0.33) {
+    setAceptarTruco(false);
+    setPartidaTerminada(true)
+    setGanadorPartida('Jugador 1')
+    setPuntosJ1(puntosj1+1)
+    setRondasGanadasJ1(0)
+    setRondasGanadasJ2(0)
+    console.log("IA rechazó el truco");
+  } else if (decisionIA < 0.66) {
+    setAceptarTruco(true);
+    console.log("IA aceptó el truco");
+  } else manejarCantoReTruco(2); // La IA canta re truco
+};
+
+// Función para manejar el canto de truco por parte de la IA
+const manejarCantoTrucoIA = () => {
+  setTrucoCantado(true);
+  setPreguntaVisible(true);
+};
+
+// Función para manejar la respuesta del jugador 1 al truco
+const manejarRespuestaTruco = (respuesta) => {
+  if (respuesta === 'retruco') {
+    manejarCantoReTruco(1);
+  } else {
+    setAceptarTruco(respuesta);
+    setPreguntaVisible(false);///setPuntosJ1((prev)=>prev+1)
+    if (!respuesta){
+      console.log("Jugador 1 rechazó el truco")
+    setPartidaTerminada(true)
+    setGanadorPartida('Jugador 2')
+    setPuntosJ2(puntosj2+1)
+    setRondasGanadasJ1(0)
+    setRondasGanadasJ2(0)
+    setPreguntaVisible(false);
+    }
+  }
+};
+
+// Función para manejar el canto de re truco
+const manejarCantoReTruco = (jugador) => {
+  setReTrucoCantado(true);
+  if (jugador === 1) {
+    const decisionIA = Math.random(); // Probabilidad para IA
+    if (decisionIA < 0.33) {
+      setAceptarReTruco(false);
+      console.log("IA rechazó el re truco");
+      setPartidaTerminada(true)
+    setGanadorPartida('Jugador 1')
+    setPuntosJ1(puntosj1+2)
+    setRondasGanadasJ1(0)
+    setRondasGanadasJ2(0)
+    setPreguntaReTrucoVisible(false)
+    } else if (decisionIA < 0.66) {
+      setAceptarReTruco(true);
+      console.log("IA aceptó el re truco");
+    } else manejarCantoValeCuatro(2); // La IA canta vale cuatro
+  } else {
+    setPreguntaReTrucoVisible(true);
+  }
+};
+
+// Función para manejar la respuesta del jugador 1 al re truco
+const manejarRespuestaReTruco = (respuesta) => {
+  if (respuesta === 'valecuatro') {
+    manejarCantoValeCuatro(1);
+  } else {
+    setAceptarReTruco(respuesta);
+    
+    if (!respuesta){
+      console.log("Jugador 1 rechazó el re truco");
+      setPartidaTerminada(true)
+      setGanadorPartida('Jugador 2')
+      setPuntosJ2(puntosj2+2)
+      setRondasGanadasJ1(0)
+      setRondasGanadasJ2(0)
+      setPreguntaReTrucoVisible(false)
+
+    }
+  }
+};
+
+// Función para manejar el canto de vale cuatro
+const manejarCantoValeCuatro = (jugador) => {
+  setValeCuatroCantado(true);
+  if (jugador === 1) {
+    const decisionIA = Math.random(); // Probabilidad para IA
+    if (decisionIA < 0.5) {
+      setAceptarValeCuatro(false);
+      console.log("IA rechazó el vale cuatro");
+      setPartidaTerminada(true)
+    setGanadorPartida('Jugador 1')
+    setPuntosJ1(puntosj1+3)
+    setRondasGanadasJ1(0)
+    setRondasGanadasJ2(0)
+    setPreguntaValeCuatroVisible(false)
+    } else {
+      setAceptarValeCuatro(true);
+      console.log("IA aceptó el vale cuatro");
+    }
+  } else {
+    setPreguntaValeCuatroVisible(true);
+  }
+};
+
+// Función para manejar la respuesta del jugador 1 al vale cuatro
+const manejarRespuestaValeCuatro = (respuesta) => {
+  setAceptarValeCuatro(respuesta);
+  setPreguntaValeCuatroVisible(false);
+  if (!respuesta) {
+    console.log("Jugador 1 rechazó el vale cuatro");
+    setPartidaTerminada(true)
+    setGanadorPartida('Jugador 2')
+    setPuntosJ2(puntosj2+3)
+    setRondasGanadasJ1(0)
+    setRondasGanadasJ2(0)
+    
+  }
+  else console.log("Jugador 1 aceptó el vale cuatro");
+};
+
+// Verificar si la IA canta truco antes de jugar una carta
+useEffect(() => {
+
+  
+  if (turno === 2 && !trucoCantado && Math.random() < 0.5) {
+    manejarCantoTrucoIA();
+  }
+  if(aceptarTruco || aceptarReTruco || aceptarValeCuatro){
+    setPreguntaVisible(false)
+    setPreguntaReTrucoVisible(false)
+    setPreguntaValeCuatroVisible(false)
+  }
+
+}, [turno, trucoCantado, reTrucoCantado, valeCuatroCantado, aceptarTruco, aceptarReTruco, aceptarValeCuatro]);
+
+
+
+
+
+
+
+
+
+    
+  function barajarMazo(mazo) {
+  const nuevoMazo = [...mazo]; // Copia el mazo para no mutar el original
+  for (let i = nuevoMazo.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1)); // Índice aleatorio entre 0 e i
+    [nuevoMazo[i], nuevoMazo[j]] = [nuevoMazo[j], nuevoMazo[i]]; // Intercambiar cartas
+  }
+  return nuevoMazo;
+}
+      function repartirCartas(mazo) {
+        const mazoBarajado = barajarMazo([...mazo])
+        console.log(mazoBarajado)
+        return {
+          jugador1: mazoBarajado.slice(0, 3),
+          jugador2: mazoBarajado.slice(3, 6),
+          
+        }
+      }
+    
+  const manejarReparto = (nuevoJugadorInicial) => {
+    setPreguntaReTrucoVisible(false)
+    setPreguntaReTrucoVisible(false)
+    setPreguntaValeCuatroVisible(false)
+    setAceptarTruco(null)
+    setAceptarReTruco(null)
+    setAceptarValeCuatro(null)
+    setTrucoCantado(false)
+    setReTrucoCantado(false)
+    setValeCuatroCantado(false)
+    const { jugador1, jugador2 } = repartirCartas(MAZO);
+    setJugador1(jugador1);
+    setJugador2(jugador2);
+    setCartaSeleccionadaJ1(null);
+    setCartaSeleccionadaJ2(null);
+    setCartaJ1Mesa([])
+    setCartaJ2Mesa([])
+    setRondasGanadasJ1(0);
+    setRondasGanadasJ2(0);
+    setRondaActual(1);
+    setTurno(nuevoJugadorInicial); 
+    setCartasJugadas([]);
+    setGanadorPartida(null);
+    setPartidaTerminada(false)
+    setEnvidoCantado(false);
+    setEnvidoGanador(null);
+    
+  };
+
+  
+  const manejarEnvido = () => {
+    setEnvidoCantado(true);
+    const envidoJ1 = calcularEnvido(jugador1);
+    const envidoJ2 = calcularEnvido(jugador2);
+    console.log(envidoJ1, '/', envidoJ2)
+    if (envidoJ1 > envidoJ2) {
+      setEnvidoGanador('Jugador 1');
+      setPuntosJ1(puntosj1 + 2);
+    } else if (envidoJ2 > envidoJ1) {
+      setEnvidoGanador('Jugador 2');
+      setPuntosJ2(puntosj2 + 2);
+    } else {
+      if(jugadorInicial===1){
+        setEnvidoGanador('Jugador 1');
+        setPuntosJ1(puntosj1 + 2);
+      }else{
+        setEnvidoGanador('Jugador 2');
+        setPuntosJ2(puntosj2 + 2);
+      }
+    }
+  };
+  const manejarEnvidoIA = () => {
+
+  }
+
+
+  const cambiarTurno = () => {
+    setTurno((prevTurno) => (prevTurno === 1 ? 2 : 1));
+  };
+  const cartaJugadaJ1 = () => {
+    if(turno ===1 && cartaSeleccionadaJ1 /*&& !cartaSeleccionadaJ2*/ ){
+      setCartaJ1Mesa((prev)=>[...prev,{carta:cartaSeleccionadaJ1}])
+      setJugada(true)
+      setCartaSeleccionadaJ1(null)
+      cambiarTurno()
+      
+    }
+   
+  }
+  const cartaJugadaJ2 = () =>{
+    
+      try{
+      const cartaIA = seleccionarCartaIA(jugador2);
+      setCartaSeleccionadaJ2(cartaIA);
+      setCartaJ2Mesa((prev)=>[...prev,{carta:cartaIA}])
+      setJugadaIA(false)  
+      
+      }
+      catch(e){
+        console.log(e)
+      
+      }
+
+  }
+  
+  const manejarJugada = () => {
+    if (jugada && cartaSeleccionadaJ2) {
+     
+      let cartaElegidaJ1 = cartaJ1EnMesa.pop()
+      let cartaElegidaJ2 = cartaJ2EnMesa.pop()
+      console.log(cartaElegidaJ1.carta, ' / ',cartaSeleccionadaJ2)
+      const ganador = calcularGanadorCarta(cartaElegidaJ1.carta, cartaElegidaJ2.carta);
+      setCartasJugadas((prev) => [...prev, { cartaJ1: cartaElegidaJ1.carta, cartaJ2: cartaElegidaJ2.carta, ganador }]);
+  
+      if (ganador === 'Jugador 1') {
+        setRondasGanadasJ1(rondasGanadasJ1 + 1);
+        setTurno(1)
+      } else if (ganador === 'Jugador 2') {
+        setRondasGanadasJ2(rondasGanadasJ2 + 1);
+        setTurno(2)
+      }
+  
+      setJugador1(jugador1.filter(carta => carta !== cartaElegidaJ1.carta))
+      setJugador2(jugador2.filter(carta => carta !== cartaElegidaJ2.carta))
+      setCartaSeleccionadaJ1(null)
+      setCartaSeleccionadaJ2(null)
+      setJugada(false)
+      setRondaActual(rondaActual + 1)
+     
+    }
+  }
+  
+
+  const reiniciar= () =>{
+    setGanadorPartida(null)
+    
+    setRondaActual(0)
+    setJugador1([])
+    setJugador2([])
+    
+  }
+
+ 
+  useEffect(()=>{
+   
+   if(turno===2 && !cartaSeleccionadaJ2){
+    setJugadaIA(true)
+    if(jugadaIA){
+      cartaJugadaJ2()
+      console.log('jugadaIA ',jugadaIA)
+      cambiarTurno()
+    }
+   }
+   
+    
+    if (rondasGanadasJ1 === 2) {
+        if(aceptarTruco){
+          setPartidaTerminada(true)
+        setGanadorPartida('Jugador 1')
+        setPuntosJ1(puntosj1+2)
+        setRondasGanadasJ1(0)
+        setRondasGanadasJ2(0)
+        console.log('el j1 gano con truco')
+        }
+        else if(aceptarReTruco){
+          setPartidaTerminada(true)
+        setGanadorPartida('Jugador 1')
+        setPuntosJ1(puntosj1+3)
+        setRondasGanadasJ1(0)
+        setRondasGanadasJ2(0)
+        console.log('el j1 gano con REtruco')
+        }
+        else if(aceptarValeCuatro){
+          setPartidaTerminada(true)
+        setGanadorPartida('Jugador 1')
+        setPuntosJ1(puntosj1+4)
+        setRondasGanadasJ1(0)
+        setRondasGanadasJ2(0)
+        console.log('el j1 gano con vale 4')
+        }
+        else{
+          setPartidaTerminada(true)
+        setGanadorPartida('Jugador 1')
+        setPuntosJ1(puntosj1+1)
+        setRondasGanadasJ1(0)
+        setRondasGanadasJ2(0)
+        }
+        
+      } 
+    else if (rondasGanadasJ2 === 2) {
+      if(aceptarTruco){
+        setPartidaTerminada(true)
+        setGanadorPartida('Jugador 2')
+        setPuntosJ2(puntosj2+2)
+        setRondasGanadasJ1(0)
+        setRondasGanadasJ2(0)
+        console.log('el j2 gano con truco')
+      }
+      else if(aceptarReTruco){
+        setPartidaTerminada(true)
+        setGanadorPartida('Jugador 2')
+        setPuntosJ2(puntosj2+3)
+        setRondasGanadasJ1(0)
+        setRondasGanadasJ2(0)
+        console.log('el j2 gano con retruco')
+      }
+      else if(aceptarValeCuatro){
+        setPartidaTerminada(true)
+        setGanadorPartida('Jugador 2')
+        setPuntosJ2(puntosj2+4)
+        setRondasGanadasJ1(0)
+        setRondasGanadasJ2(0)
+        console.log('el j2 gano con vale4')
+      }
+      else{
+        setPartidaTerminada(true)
+        setGanadorPartida('Jugador 2')
+        setPuntosJ2(puntosj2+1)
+        setRondasGanadasJ1(0)
+        setRondasGanadasJ2(0)
+      }
+        
+      }
+    
+    else if(cartasJugadas.length===3 && rondasGanadasJ1===0 && rondasGanadasJ2===0){
+          setMsg('Empate')
+          setPartidaTerminada(true)
+          reiniciar()
+        }
+    else if(cartasJugadas.length===3 && rondasGanadasJ1===1 && rondasGanadasJ2===1){
+        setMsg('Empate')
+        setPartidaTerminada(true)
+        reiniciar()
+      }
+    else if(rondaActual===2 && rondasGanadasJ1 === 0 && rondasGanadasJ2 === 0){
+        setMsg('¡Parda la mejor!')
+    }
+    else if(rondaActual===3 && rondasGanadasJ1 === 1 && rondasGanadasJ2 === 0){
+        if(aceptarTruco){
+        setPartidaTerminada(true)
+        setGanadorPartida('Jugador 1')
+        setPuntosJ1(puntosj1+2)
+        setRondasGanadasJ1(0)
+        setRondasGanadasJ2(0)
+        console.log('El j1 gano la parda con truco')
+        }
+        else if(aceptarReTruco){
+          setPartidaTerminada(true)
+          setGanadorPartida('Jugador 1')
+          setPuntosJ1(puntosj1+3)
+          setRondasGanadasJ1(0)
+          setRondasGanadasJ2(0)
+          console.log('El j1 gano la parda con retruco')
+          }
+        else if(aceptarValeCuatro){
+          setPartidaTerminada(true)
+          setGanadorPartida('Jugador 1')
+          setPuntosJ1(puntosj1+4)
+          setRondasGanadasJ1(0)
+          setRondasGanadasJ2(0)
+          console.log('El j1 gano la parda con vale 4')
+            }
+        else{
+        setPartidaTerminada(true)
+        setGanadorPartida('Jugador 1')
+        setPuntosJ1(puntosj1+1)
+        setRondasGanadasJ1(0)
+        setRondasGanadasJ2(0)
+        }
+    }
+    else if(rondaActual===3 && rondasGanadasJ1 === 0 && rondasGanadasJ2 === 1){
+        if(aceptarTruco){
+        setPartidaTerminada(true)
+        setGanadorPartida('Jugador 2')
+        setPuntosJ2(puntosj2+2)
+        setRondasGanadasJ1(0)
+        setRondasGanadasJ2(0)
+        console.log('El j2 gano la parda con truco')
+        }
+        else if(aceptarReTruco){
+        setPartidaTerminada(true)
+        setGanadorPartida('Jugador 2')
+        setPuntosJ2(puntosj2+3)
+        setRondasGanadasJ1(0)
+        setRondasGanadasJ2(0)
+        console.log('El j2 gano la parda con retruco')
+          }
+        else if(aceptarValeCuatro){
+          setPartidaTerminada(true)
+          setGanadorPartida('Jugador 2')
+          setPuntosJ2(puntosj2+4)
+          setRondasGanadasJ1(0)
+          setRondasGanadasJ2(0)
+          console.log('El j2 gano la parda con vale4')
+        }
+        else{
+        setPartidaTerminada(true)
+        setGanadorPartida('Jugador 2')
+        setPuntosJ2(puntosj2+1)
+        setRondasGanadasJ1(0)
+        setRondasGanadasJ2(0)
+        }
+    }
+     else{
+      setMsg('')
+    }
+  
+   
+  },[jugadaIA,jugada,turno,cartaJ1EnMesa, cartaJ2EnMesa,rondasGanadasJ1, rondasGanadasJ2, rondaActual, ganadorPartida, setGanadorPartida, puntosj1, puntosj2])
+
+  useEffect(()=>{
+    if(cartaJ1EnMesa.length>0 && cartaJ2EnMesa.length>0){
+      manejarJugada()
+      console.log('manejar jugada use efect')
+      console.log(cartaJ2EnMesa)
+    }
+  },[cartaJ2EnMesa,cartaJ1EnMesa])
+
+      
+      function calcularGanadorCarta(cartaJ1, cartaJ2) {
+        if (cartaJ1.jerarquia < cartaJ2.jerarquia) {
+          return 'Jugador 1';
+        } else if (cartaJ1.jerarquia > cartaJ2.jerarquia) {
+          return 'Jugador 2';
+        }
+        return 'Empate';
+      }
+      
+      function seleccionarCartaIA(cartas) {
+        
+        return cartas.sort((a, b) => a.jerarquia - b.jerarquia)[0];
+      }
+      
+      function calcularEnvido(cartas) {
+        const palos = cartas.reduce((acc, carta) => {
+          if (!acc[carta.palo]) acc[carta.palo] = [];
+          acc[carta.palo].push(carta.valor > 7 ? 0 : carta.valor);
+          return acc;
+        }, {});
+      
+        let maxEnvido = 0;
+      
+        Object.values(palos).forEach((grupo) => {
+          if (grupo.length > 1) {
+            const [primero, segundo] = grupo.sort((a, b) => b - a);
+            const suma = primero + segundo + 20; // Se suman las dos cartas más altas del mismo palo
+            maxEnvido = Math.max(maxEnvido, suma);
+          } else if (grupo.length === 1) {
+            maxEnvido = Math.max(maxEnvido, grupo[0]);
+          }
+        });
+      
+        return maxEnvido;
+      }
+      
+
+      
+
+      return{partidaTerminada, puntosj1, puntosj2, rondasGanadasJ1, rondasGanadasJ2, setJugadorInicial, manejarReparto, turno, ganadorPartida, rondaActual, cartaJugadaJ1, cartaSeleccionadaJ1,cartaSeleccionadaJ2,cartasJugadas, manejarJugada, msg, setCartaSeleccionadaJ1, jugador1, jugador2, jugadorInicial,
+        trucoCantado, aceptarTruco, manejarCantoTrucoJ1, manejarRespuestaTruco, preguntaVisible,
+        reTrucoCantado, aceptarReTruco, manejarRespuestaReTruco, preguntaReTrucoVisible,
+        valeCuatroCantado, aceptarValeCuatro, manejarRespuestaValeCuatro, preguntaValeCuatroVisible,
+        setEnvidoGanador, calcularEnvido, setPuntosJ1, setPuntosJ2, setEnvidoCantado, envidoCantado
+      }
+
+}
