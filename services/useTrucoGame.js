@@ -30,8 +30,6 @@ export function useTrucoGame(){
       const [puntosj1, setPuntosJ1] = useState(0)
       const [puntosj2, setPuntosJ2] = useState(0)
       const [turno, setTurno] = useState(1);
-      const [envidoCantado, setEnvidoCantado] = useState(false);
-      const [envidoGanador, setEnvidoGanador] = useState(null);
       const [jugada, setJugada] = useState(false)
       const [jugadaIA, setJugadaIA] = useState(false)
       const [jugadorInicial, setJugadorInicial] = useState(1);
@@ -43,7 +41,7 @@ export function useTrucoGame(){
     
     
     
-  ////truco
+  ////////////////            TRUCO     /////////////
 
   const [trucoCantado, setTrucoCantado] = useState(false);
   const [reTrucoCantado, setReTrucoCantado] = useState(false);
@@ -76,8 +74,14 @@ const manejarCantoTrucoJ1 = () => {
 
 // Función para manejar el canto de truco por parte de la IA
 const manejarCantoTrucoIA = () => {
-  setTrucoCantado(true);
-  setPreguntaVisible(true);
+  if(!partidaTerminada){
+    setTrucoCantado(true);
+    setPreguntaVisible(true);
+  }else{
+    setTrucoCantado(false);
+    setPreguntaVisible(false);
+    return
+  }
 };
 
 // Función para manejar la respuesta del jugador 1 al truco
@@ -116,6 +120,7 @@ const manejarCantoReTruco = (jugador) => {
     } else if (decisionIA < 0.66) {
       setAceptarReTruco(true);
       console.log("IA aceptó el re truco");
+      setPreguntaReTrucoVisible(false)
     } else manejarCantoValeCuatro(2); // La IA canta vale cuatro
   } else {
     setPreguntaReTrucoVisible(true);
@@ -158,6 +163,7 @@ const manejarCantoValeCuatro = (jugador) => {
     setPreguntaValeCuatroVisible(false)
     } else {
       setAceptarValeCuatro(true);
+      setPreguntaValeCuatroVisible(false)
       console.log("IA aceptó el vale cuatro");
     }
   } else {
@@ -193,8 +199,200 @@ useEffect(() => {
     setPreguntaReTrucoVisible(false)
     setPreguntaValeCuatroVisible(false)
   }
+  
 
 }, [turno, trucoCantado, reTrucoCantado, valeCuatroCantado, aceptarTruco, aceptarReTruco, aceptarValeCuatro]);
+
+
+
+
+//////////////             ENVIDO            //////////////////////////
+
+
+const [preguntaEnvidoVisible, setPreguntaEnvidoVisible] = useState(false);
+const [aceptarEnvido, setAceptarEnvido] = useState(null);
+const [tipoEnvido, setTipoEnvido] = useState(null); // 2: Envido, 4: Envido Envido, 6: Real Envido, 99: Falta Envido
+const [envidoMsg, setEnvidoMsg] = useState('')
+const [envidoCantado, setEnvidoCantado] = useState(false);
+const [envidoGanador, setEnvidoGanador] = useState(null);
+
+ 
+  // Función para manejar el canto de envido, real envido o falta envido por parte del jugador 1 o la IA
+  const manejarEnvido = (jugador, tipo) => {
+    setEnvidoCantado(true);
+    setTipoEnvido(tipo);
+  
+    if (jugador === 1 && !envidoGanador) {
+      const decisionIA = Math.random();
+  
+      //  Si ya se cantó Falta Envido, la IA solo puede aceptar o rechazar
+      if (tipo === 99 || tipoEnvido === 99) {
+        if (decisionIA < 0.5) {
+          const puntosAGanar = puntosPorRechazo(99);
+          setPuntosJ1((prev) => prev + puntosAGanar);
+          setEnvidoMsg(`Jugador 2 rechazó el Falta Envido, Jugador 1 gana ${puntosAGanar} puntos`);
+          console.log("IA rechazó el Falta Envido");
+        } else {
+          setEnvidoMsg('Jugador 2 aceptó el Falta Envido');
+          setAceptarEnvido(true);
+          manejarResolucionEnvido(99);
+        }
+        return; //  Detenemos la función aquí para evitar que la IA cante otro envido
+      }
+  
+      //  Si NO es Falta Envido, la IA decide normalmente
+      if (decisionIA < 0.2 && !envidoGanador) {
+        const puntosAGanar = puntosPorRechazo(tipo);
+        setPuntosJ1((prev) => prev + puntosAGanar);
+        setEnvidoMsg(`Jugador 2 rechazó el envido, Jugador 1 gana ${puntosAGanar} puntos`);
+        console.log("IA rechazó el envido");
+      } else if (decisionIA < 0.4 && !envidoGanador) {
+        setEnvidoMsg('Jugador 2 aceptó el envido');
+        setAceptarEnvido(true);
+        manejarResolucionEnvido(tipo);
+      } else if (decisionIA < 0.6 && tipo !== 2 && tipo !== 4 && tipoEnvido !== 6 && tipoEnvido !== 4 && !envidoGanador) {
+        manejarEnvido(2, 4); // La IA canta Envido Envido
+        console.log("IA canta Envido Envido");
+        setEnvidoMsg('Jugador 2 cantó Envido Envido');
+      } else if (decisionIA < 0.8 && tipo!==2 && tipo!==4 && tipo!==6 && tipoEnvido !== 6 && tipoEnvido !== 99 && !envidoGanador) {
+        manejarEnvido(2, 6); // La IA canta Real Envido
+        console.log("IA canta Real Envido");
+        setEnvidoMsg('Jugador 2 cantó Real Envido');
+      } else {
+        if(!envidoGanador){
+          manejarEnvido(2, 99); // La IA canta Falta Envido
+        console.log("IA canta Falta Envido");
+        setEnvidoMsg('Jugador 2 cantó Falta Envido');
+        }
+      }
+    } else {
+      setPreguntaEnvidoVisible(true);
+      
+      if(tipo===2 && !envidoGanador){
+        setEnvidoMsg('Jugador 2 canto envido');
+      }else if(tipo===4 && !envidoGanador){
+        setEnvidoMsg('Jugador 2 canto envido envido');
+      }
+      else if(tipo===6 && !envidoGanador){
+        setEnvidoMsg('Jugador 2 canto real envido');
+      }
+      else if(tipo===99 && !envidoGanador){
+        setEnvidoMsg('Jugador 2 canto falta envido');
+      }
+      
+    }
+  };
+
+ 
+  
+  
+  const puntosPorRechazo = (tipoEnvido) => {
+    switch (tipoEnvido) {
+      case 2: return 1; // Envido
+      case 4: return 2; // Envido Envido
+      case 6: return 1; // Real Envido
+      case 99: return 1; // Falta Envido
+      case "2-6": return 2; // Envido, Real Envido
+      case "2-99": return 2; // Envido, Falta Envido
+      case "6-99": return 3; // Real Envido, Falta Envido
+      case "4-6": return 4; // Envido Envido, Real Envido
+      case "4-99": return 4; // Envido Envido, Falta Envido
+      case "2-6-99": return 5; // Envido, Real Envido, Falta Envido
+      case "4-6-99": return 7; // Envido Envido, Real Envido, Falta Envido
+      default: return 0; // Si por alguna razón el tipoEnvido no está en la tabla, no suma puntos
+    }
+  };
+  // Verificar si la IA es mano y tiene 50% de probabilidad de cantar Envido
+  useEffect(() => {
+    if (turno === 2 && jugadorInicial !== 2 && rondaActual === 1 && !envidoCantado && partidaTerminada===false && cartaSeleccionadaJ2===null) {
+      const decisionIA = Math.random();
+      if(decisionIA<0.2){
+        manejarEnvido(2,2)
+      }
+      else if(decisionIA>0.2){
+        manejarEnvido(2,99)
+      }
+    }
+  }, [turno, jugadorInicial, rondaActual, envidoCantado]);
+
+  // Función para manejar la respuesta del jugador 1 al envido
+  const manejarRespuestaEnvido = (respuesta) => {
+    setPreguntaEnvidoVisible(false);
+
+    
+  if (!respuesta) { // Si el jugador rechaza el envido
+    const puntosAGanar = puntosPorRechazo(tipoEnvido);
+    
+    // Sumar puntos al otro jugador
+    if (turno === 1) {
+      setPuntosJ2((prev) => prev + puntosAGanar);
+      setEnvidoMsg(`Jugador 1 rechazó el envido, Jugador 2 gana ${puntosAGanar} puntos`);
+    } else {
+      setPuntosJ1((prev) => prev + puntosAGanar);
+      setEnvidoMsg(`Jugador 2 rechazó el envido, Jugador 1 gana ${puntosAGanar} puntos`);
+    }
+    
+    return;
+  }
+  
+    // Si ya se cantó Falta Envido, no se puede cantar otro envido
+    if (tipoEnvido === 99 && turno === 2 && respuesta !== true) {
+      console.log("No se puede cantar otro envido después de Falta Envido");
+      return;
+    }
+  
+    if (tipoEnvido === 2) {
+      if (respuesta === 'envidoenvido') {
+        manejarEnvido(1, 4);
+      } else if (respuesta === 'realenvido') {
+        manejarEnvido(1, 6);
+      } else if (respuesta === 'faltaenvido') {
+        manejarEnvido(1, 99);
+      } else {
+        setAceptarEnvido(respuesta);
+        if (respuesta) manejarResolucionEnvido(tipoEnvido);
+        else console.log("Jugador 1 rechazó el envido");
+      }
+    } else {
+      setAceptarEnvido(respuesta);
+      if (respuesta) manejarResolucionEnvido(tipoEnvido);
+      else console.log("Jugador 1 rechazó el envido");
+    }
+  };
+
+  // Función para resolver el envido según el tipo
+  const manejarResolucionEnvido = (puntos) => {
+    const envidoJ1 = calcularEnvido(jugador1);
+    const envidoJ2 = calcularEnvido(jugador2);
+    console.log(envidoJ1, '/', envidoJ2);
+    let puntosAGanar = puntos;
+    if(puntos===6){
+      puntosAGanar=3
+    }
+    if (puntos === 99) {
+      puntosAGanar = Math.max(15 - puntosj1, 15 - puntosj2); // Falta Envido da los puntos necesarios para ganar
+    }
+    if (envidoJ1 > envidoJ2) {
+      setEnvidoGanador('Jugador 1');
+      setPuntosJ1((prev) => prev + puntosAGanar);
+    } else if (envidoJ2 > envidoJ1) {
+      setEnvidoGanador('Jugador 2');
+      setPuntosJ2((prev) => prev + puntosAGanar);
+    } else {
+      if (jugadorInicial === 1) {
+        setEnvidoGanador('Jugador 1');
+        setPuntosJ1((prev) => prev + puntosAGanar);
+      } else {
+        setEnvidoGanador('Jugador 2');
+        setPuntosJ2((prev) => prev + puntosAGanar);
+      }
+    }
+  };
+
+
+
+
+
 
 
 
@@ -248,36 +446,12 @@ useEffect(() => {
     setGanadorPartida(null);
     setPartidaTerminada(false)
     setEnvidoCantado(false);
+    
     setEnvidoGanador(null);
     
   };
 
   
-  const manejarEnvido = () => {
-    setEnvidoCantado(true);
-    const envidoJ1 = calcularEnvido(jugador1);
-    const envidoJ2 = calcularEnvido(jugador2);
-    console.log(envidoJ1, '/', envidoJ2)
-    if (envidoJ1 > envidoJ2) {
-      setEnvidoGanador('Jugador 1');
-      setPuntosJ1(puntosj1 + 2);
-    } else if (envidoJ2 > envidoJ1) {
-      setEnvidoGanador('Jugador 2');
-      setPuntosJ2(puntosj2 + 2);
-    } else {
-      if(jugadorInicial===1){
-        setEnvidoGanador('Jugador 1');
-        setPuntosJ1(puntosj1 + 2);
-      }else{
-        setEnvidoGanador('Jugador 2');
-        setPuntosJ2(puntosj2 + 2);
-      }
-    }
-  };
-  const manejarEnvidoIA = () => {
-
-  }
-
 
   const cambiarTurno = () => {
     setTurno((prevTurno) => (prevTurno === 1 ? 2 : 1));
@@ -338,7 +512,6 @@ useEffect(() => {
 
   const reiniciar= () =>{
     setGanadorPartida(null)
-    
     setRondaActual(0)
     setJugador1([])
     setJugador2([])
@@ -427,15 +600,109 @@ useEffect(() => {
         
       }
     
-    else if(cartasJugadas.length===3 && rondasGanadasJ1===0 && rondasGanadasJ2===0){
-          setMsg('Empate')
-          setPartidaTerminada(true)
-          reiniciar()
+    else if(rondaActual===4 && rondasGanadasJ1===0 && rondasGanadasJ2===0){
+          
+      
+          if(jugadorInicial===1 && !partidaTerminada){
+            setPartidaTerminada(true)
+            setGanadorPartida('Jugador 1')
+            setPuntosJ1(puntosj1+1)
+            setRondasGanadasJ1(0)
+            setRondasGanadasJ2(0)
+            reiniciar()
+            console.log('El j1 gano por se mano')
+          }
+          else if(jugadorInicial===2 && !partidaTerminada){
+            setPartidaTerminada(true)
+            setGanadorPartida('Jugador 2')
+            setPuntosJ2(puntosj2+1)
+            setRondasGanadasJ1(0)
+            setRondasGanadasJ2(0)
+            reiniciar()
+            console.log('El j2 gano por se mano')
+          }
+          
         }
-    else if(cartasJugadas.length===3 && rondasGanadasJ1===1 && rondasGanadasJ2===1){
-        setMsg('Empate')
-        setPartidaTerminada(true)
+    else if(rondaActual===4 && rondasGanadasJ1===1 && rondasGanadasJ2===1){
+        
+      if(jugadorInicial===1 && !partidaTerminada){
+        
+        if(aceptarTruco){
+          setPartidaTerminada(true)
+        setGanadorPartida('Jugador 1')
+        setPuntosJ1(puntosj1+2)
+        setRondasGanadasJ1(0)
+        setRondasGanadasJ2(0)
         reiniciar()
+        console.log('El j1 gano por se mano y con truco')
+        }
+        else if(aceptarReTruco){
+          setPartidaTerminada(true)
+        setGanadorPartida('Jugador 1')
+        setPuntosJ1(puntosj1+3)
+        setRondasGanadasJ1(0)
+        setRondasGanadasJ2(0)
+        reiniciar()
+        console.log('El j1 gano por se mano y con re truco')
+        }
+        else if(aceptarValeCuatro){
+          setPartidaTerminada(true)
+        setGanadorPartida('Jugador 1')
+        setPuntosJ1(puntosj1+4)
+        setRondasGanadasJ1(0)
+        setRondasGanadasJ2(0)
+        reiniciar()
+        console.log('El j1 gano por se mano y con vale 4')
+        }
+        else{
+          setPartidaTerminada(true)
+        setGanadorPartida('Jugador 1')
+        setPuntosJ1(puntosj1+1)
+        setRondasGanadasJ1(0)
+        setRondasGanadasJ2(0)
+        reiniciar()
+        console.log('El j1 gano por se mano')
+        }
+      }
+      else if(jugadorInicial===2 && !partidaTerminada){
+        if(trucoCantado){
+          setPartidaTerminada(true)
+        setGanadorPartida('Jugador 2')
+        setPuntosJ2(puntosj2+2)
+        setRondasGanadasJ1(0)
+        setRondasGanadasJ2(0)
+        reiniciar()
+        console.log('El j2 gano por se mano y con truco')
+        }
+        else if(aceptarReTruco){
+          setPartidaTerminada(true)
+        setGanadorPartida('Jugador 2')
+        setPuntosJ2(puntosj2+3)
+        setRondasGanadasJ1(0)
+        setRondasGanadasJ2(0)
+        reiniciar()
+        console.log('El j2 gano por se mano y con re truco')
+        }
+        else if(aceptarValeCuatro){
+          setPartidaTerminada(true)
+        setGanadorPartida('Jugador 2')
+        setPuntosJ2(puntosj2+4)
+        setRondasGanadasJ1(0)
+        setRondasGanadasJ2(0)
+        reiniciar()
+        console.log('El j2 gano por se mano y con vale 4')
+        }
+        else{
+          setPartidaTerminada(true)
+        setGanadorPartida('Jugador 2')
+        setPuntosJ2(puntosj2+1)
+        setRondasGanadasJ1(0)
+        setRondasGanadasJ2(0)
+        reiniciar()
+        console.log('El j2 gano por se mano')
+        }
+      }
+      
       }
     else if(rondaActual===2 && rondasGanadasJ1 === 0 && rondasGanadasJ2 === 0){
         setMsg('¡Parda la mejor!')
@@ -516,10 +783,14 @@ useEffect(() => {
   useEffect(()=>{
     if(cartaJ1EnMesa.length>0 && cartaJ2EnMesa.length>0){
       manejarJugada()
-      console.log('manejar jugada use efect')
-      console.log(cartaJ2EnMesa)
     }
   },[cartaJ2EnMesa,cartaJ1EnMesa])
+  useEffect(()=>{
+    if(ganadorPartida){
+      setPartidaTerminada(true)
+      setTipoEnvido(null)
+    }
+  },[ganadorPartida])
 
       
       function calcularGanadorCarta(cartaJ1, cartaJ2) {
@@ -565,7 +836,8 @@ useEffect(() => {
         trucoCantado, aceptarTruco, manejarCantoTrucoJ1, manejarRespuestaTruco, preguntaVisible,
         reTrucoCantado, aceptarReTruco, manejarRespuestaReTruco, preguntaReTrucoVisible,
         valeCuatroCantado, aceptarValeCuatro, manejarRespuestaValeCuatro, preguntaValeCuatroVisible,
-        setEnvidoGanador, calcularEnvido, setPuntosJ1, setPuntosJ2, setEnvidoCantado, envidoCantado
+        envidoMsg,preguntaEnvidoVisible, manejarRespuestaEnvido,tipoEnvido, envidoCantado, manejarEnvido,aceptarEnvido
+
       }
 
 }
