@@ -105,6 +105,7 @@ const manejarRespuestaTruco = (respuesta) => {
 
 // Función para manejar el canto de re truco
 const manejarCantoReTruco = (jugador) => {
+  setPreguntaVisible(false)
   setReTrucoCantado(true);
   if (jugador === 1) {
     const decisionIA = Math.random(); // Probabilidad para IA
@@ -150,6 +151,7 @@ const manejarRespuestaReTruco = (respuesta) => {
 // Función para manejar el canto de vale cuatro
 const manejarCantoValeCuatro = (jugador) => {
   setValeCuatroCantado(true);
+  setPreguntaReTrucoVisible(false)
   if (jugador === 1) {
     const decisionIA = Math.random(); // Probabilidad para IA
     if (decisionIA < 0.5) {

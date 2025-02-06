@@ -3,7 +3,7 @@ import "./TrucoGame.css"
 import { useTrucoGame } from "../services/useTrucoGame"
 import { Carta, CartaTapada } from "./Cartas.jsx"
 import { Container, Row, Col, Card, Button } from "react-bootstrap"
-import { Award, Coins, Message, Shield, Trophy } from "./Icons.jsx"
+import { Award, Coins, Message, Shield, Trophy, Cards } from "./Icons.jsx"
 
 export function TrucoGame() {
   const [cartaJ2EnMesa, setCartaJ2EnMesa] = useState([])
@@ -62,14 +62,19 @@ export function TrucoGame() {
 
   return (
     <div className="game">
+
+      
       <div className="tablero">
-    
+      
+   
       <Row className="cartas-col">
-            <Col className="cartas">
+           <div className="j2-mesa">
+           <Col className="cartas">
               { jugador2?.map((carta, index) => (
                 <CartaTapada key={index} carta={carta} />
               ))}
             </Col>
+           </div>
           </Row>
 
 
@@ -127,18 +132,16 @@ export function TrucoGame() {
             preguntaValeCuatroVisible
           }
         >
-          Jugar Carta
+          Jugar Carta 
         </Button>}
             
           </Row>
           
-     
-              
-        
-        
-
-     
       </div>
+
+
+
+
 
       <div className="aside">
         <div>
@@ -177,7 +180,7 @@ export function TrucoGame() {
             manejarReparto(nuevoJugadorInicial)
           }}
         >
-          Repartir Cartas
+          Repartir Cartas <Cards></Cards>
         </Button>
    
       <div className="puntos">

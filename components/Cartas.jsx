@@ -19,7 +19,7 @@ export function Carta({ carta, seleccionada, onClick, idCardPlayer }) {
       <Card
         className="carta-tapada"
       >
-        <Image src='./mazo/reves.webp'></Image>
+        <Image src='./mazo/reves.png'></Image>
          
         
       </Card>
