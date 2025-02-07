@@ -214,7 +214,7 @@ export function TrucoGame() {
       {turno === 1 && !trucoCantado && jugador1.length > 0 && jugador2.length > 0 && (
          <div className="btn-truco"> <Button onClick={manejarCantoTrucoJ1}>Cantar Truco</Button></div>
         )}
-      {turno === 1 && !envidoCantado && !ganadorPartida && rondaActual === 1 && jugadorInicial === 2 && (
+      {turno === 1 && !envidoCantado && !ganadorPartida && rondaActual === 1 && jugadorInicial === 2 && (envidoGanador!=='Jugador 2' && envidoGanador!=='Jugador 1') && (
           <div className="envido-options">
             
             <Button  disabled={turno !== 1 || ganadorPartida || preguntaVisible} onClick={() => manejarEnvido(1, 2)}>

@@ -795,6 +795,7 @@ const [envidoJugador2, setEnvidoJugador2] = useState(0)
     if(ganadorPartida){
       setPartidaTerminada(true)
       setTipoEnvido(null)
+      setPreguntaVisible(false)
     }
   },[ganadorPartida])
 
