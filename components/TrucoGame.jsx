@@ -17,7 +17,6 @@ export function TrucoGame() {
     manejarReparto,
     turno,
     ganadorPartida,
-    envidoGanador,
     rondaActual,
     cartaJugadaJ1,
     cartaSeleccionadaJ1,
@@ -46,7 +45,8 @@ export function TrucoGame() {
     tipoEnvido,
     envidoCantado,
     manejarEnvido,
-    aceptarEnvido
+    aceptarEnvido,
+    envidoGanador, envidoJugador1, envidoJugador2
   } = useTrucoGame()
 
   useEffect(() => {
@@ -121,7 +121,14 @@ export function TrucoGame() {
                 />
               ))}
             </Col>
-            {!ganadorPartida && <Button
+            
+
+
+         
+          
+          <div className="btn-primary-div">
+          {!ganadorPartida && <Button
+          
           onClick={cartaJugadaJ1}
           disabled={
             turno !== 1 ||
@@ -134,7 +141,10 @@ export function TrucoGame() {
         >
           Jugar Carta 
         </Button>}
-            
+          </div>
+         
+          
+
           </Row>
           
       </div>
@@ -160,18 +170,25 @@ export function TrucoGame() {
         <div className="cantos">
           <Message className='icon'>Cantos</Message>
           {trucoCantado && !aceptarTruco && !aceptarReTruco && <p>Se cantó Truco</p>}
-          {reTrucoCantado && !aceptarReTruco && !aceptarValeCuatro && <p>Se cantó Retruco</p>}
-          {valeCuatroCantado && !aceptarValeCuatro  && <p>Se cantó Vale Cuatro</p>}
-       
+          {trucoCantado && !aceptarTruco && partidaTerminada && <p>No se aceptó Truco</p>}
           {aceptarTruco && !reTrucoCantado && <p>Se aceptó truco</p>}
+          {reTrucoCantado && !aceptarReTruco && !aceptarValeCuatro && <p>Se cantó Retruco</p>}
           {aceptarReTruco && !valeCuatroCantado && <p>Se aceptó retruco</p>}
+          {reTrucoCantado && !aceptarReTruco && partidaTerminada && <p>No se acepto el Retruco</p>}
+          {valeCuatroCantado && !aceptarValeCuatro  && <p>Se cantó Vale Cuatro</p>}
           {aceptarValeCuatro && <p>Se aceptó vale cuatro</p>}
-
+          {valeCuatroCantado && !aceptarValeCuatro && partidaTerminada && <p>No se acepto el vale 4</p>}
+       
+          
           {envidoCantado && !aceptarEnvido && <p>Se cantó envido</p>}
+          {envidoCantado && aceptarEnvido && <p>Se aceptó el envido</p>}
+          {envidoGanador && <p>Ganador del envido {envidoGanador}. Envido: {envidoJugador1}/{envidoJugador2}</p>}
+         
         </div>
 
         
-        <Button
+       <div className="btn-primary-div">
+       <Button
           disabled={(jugador1.length>0 && jugador2.length>0) && !partidaTerminada}
 
           onClick={() => {
@@ -182,6 +199,7 @@ export function TrucoGame() {
         >
           Repartir Cartas <Cards></Cards>
         </Button>
+       </div>
    
       <div className="puntos">
       <div className="puntuacionj1">
@@ -193,9 +211,22 @@ export function TrucoGame() {
 
 
       </div>
-
-        {turno === 1 && !trucoCantado && jugador1.length > 0 && jugador2.length > 0 && (
-          <Button onClick={manejarCantoTrucoJ1}>Cantar Truco</Button>
+      {turno === 1 && !trucoCantado && jugador1.length > 0 && jugador2.length > 0 && (
+         <div className="btn-truco"> <Button onClick={manejarCantoTrucoJ1}>Cantar Truco</Button></div>
+        )}
+      {turno === 1 && !envidoCantado && !ganadorPartida && rondaActual === 1 && jugadorInicial === 2 && (
+          <div className="envido-options">
+            
+            <Button  disabled={turno !== 1 || ganadorPartida || preguntaVisible} onClick={() => manejarEnvido(1, 2)}>
+              Cantar Envido
+            </Button>
+            <Button  disabled={turno !== 1 || ganadorPartida || preguntaVisible} onClick={() => manejarEnvido(1, 6)}>
+              Cantar Real Envido
+            </Button>
+            <Button  disabled={turno !== 1 || ganadorPartida || preguntaVisible} onClick={() => manejarEnvido(1, 99)}>
+              Cantar Falta Envido
+            </Button>
+          </div>
         )}
         
 
@@ -252,19 +283,7 @@ export function TrucoGame() {
           </div>
         )}
 
-        {turno === 1 && !envidoCantado && !ganadorPartida && rondaActual === 1 && jugadorInicial === 2 && (
-          <div className="envido-options">
-            <Button disabled={turno !== 1 || ganadorPartida || preguntaVisible} onClick={() => manejarEnvido(1, 2)}>
-              Cantar Envido
-            </Button>
-            <Button disabled={turno !== 1 || ganadorPartida || preguntaVisible} onClick={() => manejarEnvido(1, 6)}>
-              Cantar Real Envido
-            </Button>
-            <Button disabled={turno !== 1 || ganadorPartida || preguntaVisible} onClick={() => manejarEnvido(1, 99)}>
-              Cantar Falta Envido
-            </Button>
-          </div>
-        )}
+       
 
         
       </div>

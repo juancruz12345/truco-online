@@ -217,6 +217,8 @@ const [tipoEnvido, setTipoEnvido] = useState(null); // 2: Envido, 4: Envido Envi
 const [envidoMsg, setEnvidoMsg] = useState('')
 const [envidoCantado, setEnvidoCantado] = useState(false);
 const [envidoGanador, setEnvidoGanador] = useState(null);
+const [envidoJugador1, setEnvidoJugador1] = useState(0)
+const [envidoJugador2, setEnvidoJugador2] = useState(0)
 
  
   // Función para manejar el canto de envido, real envido o falta envido por parte del jugador 1 o la IA
@@ -366,6 +368,8 @@ const [envidoGanador, setEnvidoGanador] = useState(null);
   const manejarResolucionEnvido = (puntos) => {
     const envidoJ1 = calcularEnvido(jugador1);
     const envidoJ2 = calcularEnvido(jugador2);
+    setEnvidoJugador1(envidoJ1)
+    setEnvidoJugador2(envidoJ2)
     console.log(envidoJ1, '/', envidoJ2);
     let puntosAGanar = puntos;
     if(puntos===6){
@@ -838,7 +842,8 @@ const [envidoGanador, setEnvidoGanador] = useState(null);
         trucoCantado, aceptarTruco, manejarCantoTrucoJ1, manejarRespuestaTruco, preguntaVisible,
         reTrucoCantado, aceptarReTruco, manejarRespuestaReTruco, preguntaReTrucoVisible,
         valeCuatroCantado, aceptarValeCuatro, manejarRespuestaValeCuatro, preguntaValeCuatroVisible,
-        envidoMsg,preguntaEnvidoVisible, manejarRespuestaEnvido,tipoEnvido, envidoCantado, manejarEnvido,aceptarEnvido
+        envidoMsg,preguntaEnvidoVisible, manejarRespuestaEnvido,tipoEnvido, envidoCantado, manejarEnvido,aceptarEnvido,
+        envidoGanador, envidoJugador1, envidoJugador2
 
       }
 
