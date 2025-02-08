@@ -398,26 +398,27 @@ const [envidoJugador2, setEnvidoJugador2] = useState(0)
   function calcularEnvido(cartas) {
     const palos = cartas.reduce((acc, carta) => {
       if (!acc[carta.palo]) acc[carta.palo] = [];
-      acc[carta.palo].push(carta.valor > 7 ? 0 : carta.valor);
+      acc[carta.palo].push(carta.valor > 9 ? 0 : carta.valor); // Figuras valen 0
       return acc;
     }, {});
   
     let maxEnvido = 0;
   
     Object.values(palos).forEach((grupo) => {
-      if (grupo.length > 1) {
-        const [primero, segundo] = grupo.sort((a, b) => b - a);
-        const suma = primero + segundo + 20; // Se suman las dos cartas más altas del mismo palo
+      const grupoOrdenado = grupo.sort((a, b) => b - a); 
+  
+      if (grupoOrdenado.length > 1) {
+        const suma = grupoOrdenado[0] + grupoOrdenado[1] + 20;
         maxEnvido = Math.max(maxEnvido, suma);
-      } else if (grupo.length === 1) {
-        maxEnvido = Math.max(maxEnvido, grupo[0]);
+      } else {
+        maxEnvido = Math.max(maxEnvido, grupoOrdenado[0]);
       }
     });
   
     return maxEnvido;
   }
-
-
+  
+  
 
 
 

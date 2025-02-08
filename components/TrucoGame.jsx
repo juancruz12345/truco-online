@@ -4,6 +4,7 @@ import { useTrucoGame } from "../services/useTrucoGame"
 import { Carta, CartaTapada } from "./Cartas.jsx"
 import { Container, Row, Col, Card, Button } from "react-bootstrap"
 import { Award, Coins, Message, Shield, Trophy, Cards } from "./Icons.jsx"
+import { Score } from "./Score.jsx"
 
 export function TrucoGame() {
   const [cartaJ2EnMesa, setCartaJ2EnMesa] = useState([])
@@ -207,10 +208,12 @@ export function TrucoGame() {
    
       <div className="puntos">
       <div className="puntuacionj1">
-        <div>Puntos j1: {puntosj1}</div>
+        <div>Puntos j1</div>
+        <Score puntos={puntosj1}></Score>
         </div>
         <div className="puntuacion">
-        <div>Puntos j2: {puntosj2}</div>
+        <div>Puntos j2</div>
+        <Score puntos={puntosj2}></Score>
         </div>
 
 
