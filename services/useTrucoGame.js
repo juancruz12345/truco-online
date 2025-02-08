@@ -36,7 +36,7 @@ export function useTrucoGame(){
       const [cartaJ1EnMesa, setCartaJ1Mesa] = useState([])
       const [cartaJ2EnMesa, setCartaJ2Mesa] = useState([])
       const [partidaTerminada, setPartidaTerminada] = useState(false)
-      
+      const [ganadorJuego, setGanadorJuego]=useState(null)
 
     
     
@@ -395,12 +395,27 @@ const [envidoJugador2, setEnvidoJugador2] = useState(0)
     }
   };
 
-
-
-
-
-
-
+  function calcularEnvido(cartas) {
+    const palos = cartas.reduce((acc, carta) => {
+      if (!acc[carta.palo]) acc[carta.palo] = [];
+      acc[carta.palo].push(carta.valor > 7 ? 0 : carta.valor);
+      return acc;
+    }, {});
+  
+    let maxEnvido = 0;
+  
+    Object.values(palos).forEach((grupo) => {
+      if (grupo.length > 1) {
+        const [primero, segundo] = grupo.sort((a, b) => b - a);
+        const suma = primero + segundo + 20; // Se suman las dos cartas más altas del mismo palo
+        maxEnvido = Math.max(maxEnvido, suma);
+      } else if (grupo.length === 1) {
+        maxEnvido = Math.max(maxEnvido, grupo[0]);
+      }
+    });
+  
+    return maxEnvido;
+  }
 
 
 
@@ -522,6 +537,29 @@ const [envidoJugador2, setEnvidoJugador2] = useState(0)
     setJugador1([])
     setJugador2([])
     
+  }
+  function reiniciarJuego(){
+    setGanadorPartida(null)
+    setRondaActual(0)
+    setJugador1([])
+    setJugador2([])
+    setGanadorJuego(null)
+    setPuntosJ1(0)
+    setPuntosJ2(0)
+    setPreguntaEnvidoVisible(false)
+    setPreguntaVisible(false)
+    setPreguntaReTrucoVisible(false)
+    setPreguntaValeCuatroVisible(false)
+    setTrucoCantado(false)
+    setReTrucoCantado(false)
+    setValeCuatroCantado(false)
+    setAceptarEnvido(false)
+    setAceptarReTruco(false)
+    setAceptarTruco(false)
+    setAceptarValeCuatro(false)
+    setEnvidoGanador(false)
+    setPartidaTerminada(true)
+
   }
 
  
@@ -798,6 +836,19 @@ const [envidoJugador2, setEnvidoJugador2] = useState(0)
       setPreguntaVisible(false)
     }
   },[ganadorPartida])
+  useEffect(()=>{
+    if(puntosj1>=30){
+      setGanadorJuego('Jugador 1')
+      setPartidaTerminada(true)
+      setTipoEnvido(null)
+      setPreguntaVisible(false)
+    }else if(puntosj2>=30){
+      setGanadorJuego('Jugador 2')
+      setPartidaTerminada(true)
+      setTipoEnvido(null)
+      setPreguntaVisible(false)
+    }
+  },[puntosj1, puntosj2])
 
       
       function calcularGanadorCarta(cartaJ1, cartaJ2) {
@@ -814,27 +865,7 @@ const [envidoJugador2, setEnvidoJugador2] = useState(0)
         return cartas.sort((a, b) => a.jerarquia - b.jerarquia)[0];
       }
       
-      function calcularEnvido(cartas) {
-        const palos = cartas.reduce((acc, carta) => {
-          if (!acc[carta.palo]) acc[carta.palo] = [];
-          acc[carta.palo].push(carta.valor > 7 ? 0 : carta.valor);
-          return acc;
-        }, {});
       
-        let maxEnvido = 0;
-      
-        Object.values(palos).forEach((grupo) => {
-          if (grupo.length > 1) {
-            const [primero, segundo] = grupo.sort((a, b) => b - a);
-            const suma = primero + segundo + 20; // Se suman las dos cartas más altas del mismo palo
-            maxEnvido = Math.max(maxEnvido, suma);
-          } else if (grupo.length === 1) {
-            maxEnvido = Math.max(maxEnvido, grupo[0]);
-          }
-        });
-      
-        return maxEnvido;
-      }
       
 
       
@@ -844,7 +875,7 @@ const [envidoJugador2, setEnvidoJugador2] = useState(0)
         reTrucoCantado, aceptarReTruco, manejarRespuestaReTruco, preguntaReTrucoVisible,
         valeCuatroCantado, aceptarValeCuatro, manejarRespuestaValeCuatro, preguntaValeCuatroVisible,
         envidoMsg,preguntaEnvidoVisible, manejarRespuestaEnvido,tipoEnvido, envidoCantado, manejarEnvido,aceptarEnvido,
-        envidoGanador, envidoJugador1, envidoJugador2
+        envidoGanador, envidoJugador1, envidoJugador2, ganadorJuego, reiniciarJuego
 
       }
 

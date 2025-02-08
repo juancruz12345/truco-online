@@ -46,7 +46,8 @@ export function TrucoGame() {
     envidoCantado,
     manejarEnvido,
     aceptarEnvido,
-    envidoGanador, envidoJugador1, envidoJugador2
+    envidoGanador, envidoJugador1, envidoJugador2,
+    ganadorJuego,reiniciarJuego
   } = useTrucoGame()
 
   useEffect(() => {
@@ -56,7 +57,7 @@ export function TrucoGame() {
     if (partidaTerminada) {
       setCartaJ2EnMesa([])
     }
-  }, [cartaSeleccionadaJ2, partidaTerminada])
+  }, [cartaSeleccionadaJ2, partidaTerminada, ganadorJuego])
 
   
 
@@ -65,7 +66,10 @@ export function TrucoGame() {
 
       
       <div className="tablero">
-      
+      {ganadorJuego && <div>
+        <h1><strong>Ganador del juego: {ganadorJuego}</strong></h1>
+        <Button onClick={reiniciarJuego}>Reiniciar</Button>
+        </div>}
    
       <Row className="cartas-col">
            <div className="j2-mesa">
