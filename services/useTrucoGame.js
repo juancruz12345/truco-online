@@ -249,6 +249,7 @@ const [envidoJugador2, setEnvidoJugador2] = useState(0)
         const puntosAGanar = puntosPorRechazo(tipo);
         setPuntosJ1((prev) => prev + puntosAGanar);
         setEnvidoMsg(`Jugador 2 rechazó el envido, Jugador 1 gana ${puntosAGanar} puntos`);
+        setAceptarEnvido(false)
         console.log("IA rechazó el envido");
       } else if (decisionIA < 0.4 && !envidoGanador) {
         setEnvidoMsg('Jugador 2 aceptó el envido');
@@ -286,8 +287,6 @@ const [envidoJugador2, setEnvidoJugador2] = useState(0)
       
     }
   };
-
- 
   
   
   const puntosPorRechazo = (tipoEnvido) => {
@@ -310,114 +309,126 @@ const [envidoJugador2, setEnvidoJugador2] = useState(0)
   useEffect(() => {
     if (turno === 2 && jugadorInicial !== 2 && rondaActual === 1 && !envidoCantado && partidaTerminada===false && cartaSeleccionadaJ2===null) {
       const decisionIA = Math.random();
-      if(decisionIA<0.2){
+      if(decisionIA<0.4){
         manejarEnvido(2,2)
+    
+        
       }
-      else if(decisionIA>0.2){
+      else if(decisionIA>0.4 && decisionIA<0.8){
+        manejarEnvido(2,6)
+       
+      }
+      else if(decisionIA>0.8){
         manejarEnvido(2,99)
+      
       }
+      
     }
   }, [turno, jugadorInicial, rondaActual, envidoCantado]);
 
-  // Función para manejar la respuesta del jugador 1 al envido
+
   const manejarRespuestaEnvido = (respuesta) => {
-    setPreguntaEnvidoVisible(false);
+    setPreguntaEnvidoVisible(false)
 
     
-  if (!respuesta) { // Si el jugador rechaza el envido
-    const puntosAGanar = puntosPorRechazo(tipoEnvido);
+  if (!respuesta) { 
+    const puntosAGanar = puntosPorRechazo(tipoEnvido)
     
-    // Sumar puntos al otro jugador
+   
     if (turno === 1) {
-      setPuntosJ2((prev) => prev + puntosAGanar);
-      setEnvidoMsg(`Jugador 1 rechazó el envido, Jugador 2 gana ${puntosAGanar} puntos`);
+      setPuntosJ2((prev) => prev + puntosAGanar)
+      setEnvidoMsg(`Jugador 1 rechazó el envido, Jugador 2 gana ${puntosAGanar} puntos`)
     } else {
-      setPuntosJ1((prev) => prev + puntosAGanar);
-      setEnvidoMsg(`Jugador 2 rechazó el envido, Jugador 1 gana ${puntosAGanar} puntos`);
+      setPuntosJ1((prev) => prev + puntosAGanar)
+      setEnvidoMsg(`Jugador 2 rechazó el envido, Jugador 1 gana ${puntosAGanar} puntos`)
     }
     
-    return;
+    return
   }
   
     // Si ya se cantó Falta Envido, no se puede cantar otro envido
     if (tipoEnvido === 99 && turno === 2 && respuesta !== true) {
-      console.log("No se puede cantar otro envido después de Falta Envido");
-      return;
+      console.log("No se puede cantar otro envido después de Falta Envido")
+      return
     }
   
     if (tipoEnvido === 2) {
       if (respuesta === 'envidoenvido') {
-        manejarEnvido(1, 4);
+        manejarEnvido(1, 4)
       } else if (respuesta === 'realenvido') {
-        manejarEnvido(1, 6);
+        manejarEnvido(1, 6)
       } else if (respuesta === 'faltaenvido') {
-        manejarEnvido(1, 99);
+        manejarEnvido(1, 99)
       } else {
-        setAceptarEnvido(respuesta);
-        if (respuesta) manejarResolucionEnvido(tipoEnvido);
-        else console.log("Jugador 1 rechazó el envido");
+        setAceptarEnvido(respuesta)
+        if (respuesta) manejarResolucionEnvido(tipoEnvido)
+        else setEnvidoMsg("Jugador 1 rechazó el envido")
       }
     } else {
       setAceptarEnvido(respuesta);
-      if (respuesta) manejarResolucionEnvido(tipoEnvido);
-      else console.log("Jugador 1 rechazó el envido");
+      if (respuesta) manejarResolucionEnvido(tipoEnvido)
+      else setEnvidoMsg("Jugador 1 rechazó el envido")
     }
   };
 
   // Función para resolver el envido según el tipo
   const manejarResolucionEnvido = (puntos) => {
-    const envidoJ1 = calcularEnvido(jugador1);
-    const envidoJ2 = calcularEnvido(jugador2);
+    const envidoJ1 = calcularEnvido(jugador1)
+    const envidoJ2 = calcularEnvido(jugador2)
     setEnvidoJugador1(envidoJ1)
     setEnvidoJugador2(envidoJ2)
-    console.log(envidoJ1, '/', envidoJ2);
-    let puntosAGanar = puntos;
+    console.log(envidoJ1, '/', envidoJ2)
+    let puntosAGanar = puntos
     if(puntos===6){
       puntosAGanar=3
     }
     if (puntos === 99) {
-      puntosAGanar = Math.max(15 - puntosj1, 15 - puntosj2); // Falta Envido da los puntos necesarios para ganar
+      puntosAGanar = Math.max(15 - puntosj1, 15 - puntosj2)
     }
     if (envidoJ1 > envidoJ2) {
-      setEnvidoGanador('Jugador 1');
-      setPuntosJ1((prev) => prev + puntosAGanar);
+      setEnvidoGanador('Jugador 1')
+      setPuntosJ1((prev) => prev + puntosAGanar)
     } else if (envidoJ2 > envidoJ1) {
-      setEnvidoGanador('Jugador 2');
-      setPuntosJ2((prev) => prev + puntosAGanar);
+      setEnvidoGanador('Jugador 2')
+      setPuntosJ2((prev) => prev + puntosAGanar)
     } else {
       if (jugadorInicial === 1) {
-        setEnvidoGanador('Jugador 1');
-        setPuntosJ1((prev) => prev + puntosAGanar);
+        setEnvidoGanador('Jugador 1')
+        setPuntosJ1((prev) => prev + puntosAGanar)
       } else {
-        setEnvidoGanador('Jugador 2');
-        setPuntosJ2((prev) => prev + puntosAGanar);
+        setEnvidoGanador('Jugador 2')
+        setPuntosJ2((prev) => prev + puntosAGanar)
       }
     }
   };
 
   function calcularEnvido(cartas) {
     const palos = cartas.reduce((acc, carta) => {
-      if (!acc[carta.palo]) acc[carta.palo] = [];
-      acc[carta.palo].push(carta.valor > 9 ? 0 : carta.valor); // Figuras valen 0
-      return acc;
-    }, {});
-  
-    let maxEnvido = 0;
-  
+        if (!acc[carta.palo]) acc[carta.palo] = []
+        acc[carta.palo].push(carta.valor > 7 ? 0 : carta.valor)
+        return acc
+    }, {})
+
+    let maxEnvido = 0
+    let hayDosDelMismoPalo = false
+
     Object.values(palos).forEach((grupo) => {
-      const grupoOrdenado = grupo.sort((a, b) => b - a); 
-  
-      if (grupoOrdenado.length > 1) {
-        const suma = grupoOrdenado[0] + grupoOrdenado[1] + 20;
-        maxEnvido = Math.max(maxEnvido, suma);
-      } else {
-        maxEnvido = Math.max(maxEnvido, grupoOrdenado[0]);
-      }
+        if (grupo.length >= 2) {
+            hayDosDelMismoPalo = true
+            const grupoOrdenado = grupo.sort((a, b) => b - a)
+            const suma = grupoOrdenado[0] + grupoOrdenado[1] + 20
+            maxEnvido = Math.max(maxEnvido, suma)
+        }
     });
-  
-    return maxEnvido;
-  }
-  
+
+    if (!hayDosDelMismoPalo) {
+    
+        const valores = cartas.map(carta => carta.valor > 7 ? 0 : carta.valor)
+        maxEnvido = Math.max(...valores)
+    }
+
+    return maxEnvido
+}
   
 
 
@@ -678,7 +689,7 @@ const [envidoJugador2, setEnvidoJugador2] = useState(0)
         setPuntosJ1(puntosj1+2)
         setRondasGanadasJ1(0)
         setRondasGanadasJ2(0)
-        reiniciar()
+        ///reiniciar()
         console.log('El j1 gano por se mano y con truco')
         }
         else if(aceptarReTruco){
@@ -687,7 +698,7 @@ const [envidoJugador2, setEnvidoJugador2] = useState(0)
         setPuntosJ1(puntosj1+3)
         setRondasGanadasJ1(0)
         setRondasGanadasJ2(0)
-        reiniciar()
+       /// reiniciar()
         console.log('El j1 gano por se mano y con re truco')
         }
         else if(aceptarValeCuatro){
@@ -696,7 +707,7 @@ const [envidoJugador2, setEnvidoJugador2] = useState(0)
         setPuntosJ1(puntosj1+4)
         setRondasGanadasJ1(0)
         setRondasGanadasJ2(0)
-        reiniciar()
+       /// reiniciar()
         console.log('El j1 gano por se mano y con vale 4')
         }
         else{
@@ -705,7 +716,7 @@ const [envidoJugador2, setEnvidoJugador2] = useState(0)
         setPuntosJ1(puntosj1+1)
         setRondasGanadasJ1(0)
         setRondasGanadasJ2(0)
-        reiniciar()
+       /// reiniciar()
         console.log('El j1 gano por se mano')
         }
       }
@@ -716,7 +727,7 @@ const [envidoJugador2, setEnvidoJugador2] = useState(0)
         setPuntosJ2(puntosj2+2)
         setRondasGanadasJ1(0)
         setRondasGanadasJ2(0)
-        reiniciar()
+       /// reiniciar()
         console.log('El j2 gano por se mano y con truco')
         }
         else if(aceptarReTruco){
@@ -725,7 +736,7 @@ const [envidoJugador2, setEnvidoJugador2] = useState(0)
         setPuntosJ2(puntosj2+3)
         setRondasGanadasJ1(0)
         setRondasGanadasJ2(0)
-        reiniciar()
+        ///reiniciar()
         console.log('El j2 gano por se mano y con re truco')
         }
         else if(aceptarValeCuatro){
@@ -734,7 +745,7 @@ const [envidoJugador2, setEnvidoJugador2] = useState(0)
         setPuntosJ2(puntosj2+4)
         setRondasGanadasJ1(0)
         setRondasGanadasJ2(0)
-        reiniciar()
+        ///reiniciar()
         console.log('El j2 gano por se mano y con vale 4')
         }
         else{
@@ -743,7 +754,7 @@ const [envidoJugador2, setEnvidoJugador2] = useState(0)
         setPuntosJ2(puntosj2+1)
         setRondasGanadasJ1(0)
         setRondasGanadasJ2(0)
-        reiniciar()
+       /// reiniciar()
         console.log('El j2 gano por se mano')
         }
       }

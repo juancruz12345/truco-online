@@ -51,6 +51,26 @@ export function TrucoGame() {
     ganadorJuego,reiniciarJuego
   } = useTrucoGame()
 
+  
+  
+  const [nombreEnvido, setNombreEnvido] = useState('')
+  const handleEnvidoName = () =>{
+   if(tipoEnvido===2){
+    setNombreEnvido('Envido')
+   }
+   else if(tipoEnvido===4){
+    setNombreEnvido('Envido envido')
+   }
+   else if(tipoEnvido===6){
+    setNombreEnvido('Real envido')
+   }
+   else if(tipoEnvido===99){
+    setNombreEnvido('Falta envido')
+   }
+     
+  }
+  
+
   useEffect(() => {
     if (cartaSeleccionadaJ2 !== null) {
       setCartaJ2EnMesa((prevCartas) => [...prevCartas, cartaSeleccionadaJ2])
@@ -60,13 +80,16 @@ export function TrucoGame() {
     }
   }, [cartaSeleccionadaJ2, partidaTerminada, ganadorJuego])
 
-  
+  useEffect(()=>{
+    handleEnvidoName()
+  },[tipoEnvido])
 
   return (
     <div className="game">
 
       
       <div className="tablero">
+     
       {ganadorJuego && <div>
         <h1><strong>Ganador del juego: {ganadorJuego}</strong></h1>
         <Button onClick={reiniciarJuego}>Reiniciar</Button>
@@ -160,15 +183,14 @@ export function TrucoGame() {
 
       <div className="aside">
         <div>
-        {envidoGanador &&  <h2 className="envido-ganador">
-              <Award className="icon" /> Ganador del Envido: {envidoGanador}
-            </h2>}
+        
 
 {ganadorPartida ? (
-  <h4><Trophy className='icon'/> Ganador de la partida: {ganadorPartida}</h4>
+  <h2><Trophy className='icon'/> Ganador de la partida: {ganadorPartida}</h2>
 ) : (
   <h4><Shield className='icon'/> Ronda {rondaActual}</h4>
 )}
+
         </div>
 
 
@@ -185,8 +207,10 @@ export function TrucoGame() {
           {valeCuatroCantado && !aceptarValeCuatro && partidaTerminada && <p>No se acepto el vale 4</p>}
        
           
-          {envidoCantado && !aceptarEnvido && <p>Se cantó envido</p>}
-          {envidoCantado && aceptarEnvido && <p>Se aceptó el envido</p>}
+          {envidoCantado && !aceptarEnvido && <p>Se cantó {nombreEnvido}</p>}
+          {envidoCantado && aceptarEnvido && <p>{envidoMsg}</p>}
+          
+
           {envidoGanador && <p>Ganador del envido {envidoGanador}. Envido: {envidoJugador1}/{envidoJugador2}</p>}
          
         </div>
